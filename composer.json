@@ -22,6 +22,6 @@
 		"getkirby/composer-installer": "^1.1"
 	},
 	"autoload": {
-		"files": ["index.php"],
+		"files": ["index.php"]
 	}
 }
