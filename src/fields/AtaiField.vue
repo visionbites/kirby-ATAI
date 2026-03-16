@@ -38,15 +38,22 @@ export default {
 				this.isLoading = false;
 				return;
 			}
-			let data = {
-				image: uuid,
-				lang: window.panel.language.code,
-				page: window.panel.view.props.model.parent
-			}
-			const response = await this.$api.post('/atai-image', data);
-			if(!response.error_code) {
-				this.value = response.alt_text;
-				this.onInput(response.alt_text);
+			try {
+				let data = {
+					image: uuid,
+					lang: window.panel.language.code,
+					page: window.panel.view.props.model.parent
+				}
+				const response = await this.$api.post('/atai-image', data);
+				if(!response.error_code) {
+					this.value = response.alt_text;
+					this.onInput(response.alt_text);
+				} else {
+					this.$panel.error(response.error || 'Failed to generate alt text');
+				}
+			} catch (e) {
+				this.$panel.error(e.message || 'Failed to generate alt text');
+			} finally {
 				this.isLoading = false;
 			}
 		}

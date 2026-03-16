@@ -52,19 +52,23 @@ Kirby::plugin('visionbites/kirby-atai', [
 							$postData['image']['raw'] = preg_replace('#^data:image/[^;]+;base64,#', '', $imageData);
 						}
 
-						$result = Remote::request(
-							option('visionbites.kirby-atai.api_url'),
-							[
-								'headers' => [
-									'Content-Type' => 'application/json',
-									'X-API-Key' => option('visionbites.kirby-atai.api_key'),
-								],
-								'method' => 'POST',
-								'data' => json_encode($postData),
-							]
-						);
+						try {
+							$result = Remote::request(
+								option('visionbites.kirby-atai.api_url'),
+								[
+									'headers' => [
+										'Content-Type' => 'application/json',
+										'X-API-Key' => option('visionbites.kirby-atai.api_key'),
+									],
+									'method' => 'POST',
+									'data' => json_encode($postData),
+								]
+							);
 
-						return Response::json($result->content(), $result->code());
+							return Response::json($result->content(), $result->code());
+						} catch (\Exception $e) {
+							return Response::json(['error' => 'API request failed: ' . $e->getMessage(), 'error_code' => 500], 500);
+						}
 					}
 				]
 			];
