@@ -46,7 +46,6 @@ export default {
 				}
 				const response = await this.$api.post('/atai-image', data);
 				if(!response.error_code) {
-					this.value = response.alt_text;
 					this.onInput(response.alt_text);
 				} else {
 					this.$panel.error(response.error || 'Failed to generate alt text');

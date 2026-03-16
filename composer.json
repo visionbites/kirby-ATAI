@@ -19,7 +19,8 @@
 		"installer-name": "kirby-atai"
 	},
 	"require": {
-		"getkirby/composer-installer": "^1.1"
+		"getkirby/composer-installer": "^1.1",
+		"getkirby/kirby": "^5.0"
 	},
 	"autoload": {
 		"files": ["index.php"]
