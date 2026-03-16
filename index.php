@@ -23,11 +23,11 @@ Kirby::plugin('visionbites/kirby-atai', [
 					'method' => 'POST',
 					'action'  => function () use ($kirby) {
 						$inputData = $kirby->request()->get();
-						$imageUUID = $inputData['image'];
+						$imageUUID = str_starts_with($inputData['image'], 'file://') ? substr($inputData['image'], 7) : $inputData['image'];
 						$image = $kirby->file('file://' . $imageUUID);
 
 						if(!$image) {
-							return false;
+							return Response::json(['error' => 'Image not found', 'error_code' => 404], 404);
 						}
 
 						$postData = [
@@ -42,7 +42,7 @@ Kirby::plugin('visionbites/kirby-atai', [
 								]
 							]
 						];
-						$is_reachable = option('visionbites.kirby-atai.reachable', false);
+						$is_reachable = option('visionbites.kirby-atai.is_reachable', false);
 
 						if($is_reachable) {
 							$imageUrl = $image->url();
