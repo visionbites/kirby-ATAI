@@ -23,6 +23,11 @@ Kirby::plugin('visionbites/kirby-atai', [
 					'method' => 'POST',
 					'action'  => function () use ($kirby) {
 						$inputData = $kirby->request()->get();
+
+						if (!isset($inputData['image']) || !isset($inputData['lang'])) {
+							return Response::json(['error' => 'Missing required fields: image and lang', 'error_code' => 400], 400);
+						}
+
 						$imageUUID = str_starts_with($inputData['image'], 'file://') ? substr($inputData['image'], 7) : $inputData['image'];
 						$image = $kirby->file('file://' . $imageUUID);
 
@@ -36,7 +41,7 @@ Kirby::plugin('visionbites/kirby-atai', [
 								"metadata" => [
 									"image_id" => $imageUUID,
 									"reference" => option('visionbites.kirby-atai.reference'),
-									"used_key" => option('visionbites.kirby-atai.api_key'),
+									"used_key" => substr(option('visionbites.kirby-atai.api_key'), 0, 8) . '...',
 									"domain" => $kirby->request()->domain(),
 									"language" => $inputData['lang'],
 								]

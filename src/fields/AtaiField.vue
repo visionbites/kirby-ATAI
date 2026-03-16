@@ -27,10 +27,10 @@ export default {
 			let uuid = null;
 			switch (window.panel.view.component) {
 				case 'k-file-view':
-					uuid = this.$attrs["form-data"].uuid;
+					uuid = this.$attrs["form-data"]?.uuid;
 					break;
 				case 'k-page-view':
-					uuid = this.$attrs["form-data"][this.target][0].uuid;
+					uuid = this.$attrs["form-data"]?.[this.target]?.[0]?.uuid;
 					break;
 			}
 			if(!uuid) {
