@@ -11,6 +11,7 @@ export default {
 		required: Boolean,
 		when: String,
 		value: String,
+		target: String,
 	},
 	data() {
 		return {
@@ -18,20 +19,40 @@ export default {
 		}
 	},
 	methods: {
-		onInput() {
-			this.$emit("input", this.value);
+		onInput($event) {
+			this.$emit("input", $event);
 		},
 		async handleClick() {
 			this.isLoading = true;
-			let data = {
-				image: this.$attrs["form-data"].uuid,
-				lang: this.$language.code,
-				page: this.$panel.view.props.model.parent
+			let uuid = null;
+			switch (window.panel.view.component) {
+				case 'k-file-view':
+					uuid = this.$attrs["form-data"]?.uuid;
+					break;
+				case 'k-page-view':
+					uuid = this.$attrs["form-data"]?.[this.target]?.[0]?.uuid;
+					break;
 			}
-			const response = await this.$api.post('/atai-image', data);
-			if(!response.error_code) {
-				this.value = response.alt_text;
-				this.onInput();
+			if(!uuid) {
+				this.$panel.error('No uuid found. Target: "' + this.target + '"');
+				this.isLoading = false;
+				return;
+			}
+			try {
+				let data = {
+					image: uuid,
+					lang: window.panel.language.code,
+					page: window.panel.view.props.model.parent
+				}
+				const response = await this.$api.post('/atai-image', data);
+				if(!response.error_code) {
+					this.onInput(response.alt_text);
+				} else {
+					this.$panel.error(response.error || 'Failed to generate alt text');
+				}
+			} catch (e) {
+				this.$panel.error(e.message || 'Failed to generate alt text');
+			} finally {
 				this.isLoading = false;
 			}
 		}
@@ -58,7 +79,7 @@ export default {
 					type="text"
 					name="textfield"
 					:value="value"
-					@input="onInput"/>
+					@input="onInput($event)"/>
 			</k-field>
 	</div>
 

@@ -23,11 +23,16 @@ Kirby::plugin('visionbites/kirby-atai', [
 					'method' => 'POST',
 					'action'  => function () use ($kirby) {
 						$inputData = $kirby->request()->get();
-						$imageUUID = $inputData['image'];
+
+						if (!isset($inputData['image']) || !isset($inputData['lang'])) {
+							return Response::json(['error' => 'Missing required fields: image and lang', 'error_code' => 400], 400);
+						}
+
+						$imageUUID = str_starts_with($inputData['image'], 'file://') ? substr($inputData['image'], 7) : $inputData['image'];
 						$image = $kirby->file('file://' . $imageUUID);
 
 						if(!$image) {
-							return false;
+							return Response::json(['error' => 'Image not found', 'error_code' => 404], 404);
 						}
 
 						$postData = [
@@ -36,13 +41,13 @@ Kirby::plugin('visionbites/kirby-atai', [
 								"metadata" => [
 									"image_id" => $imageUUID,
 									"reference" => option('visionbites.kirby-atai.reference'),
-									"used_key" => option('visionbites.kirby-atai.api_key'),
+									"used_key" => substr(option('visionbites.kirby-atai.api_key'), 0, 8) . '...',
 									"domain" => $kirby->request()->domain(),
 									"language" => $inputData['lang'],
 								]
 							]
 						];
-						$is_reachable = option('visionbites.kirby-atai.reachable', false);
+						$is_reachable = option('visionbites.kirby-atai.is_reachable', false);
 
 						if($is_reachable) {
 							$imageUrl = $image->url();
@@ -52,19 +57,23 @@ Kirby::plugin('visionbites/kirby-atai', [
 							$postData['image']['raw'] = preg_replace('#^data:image/[^;]+;base64,#', '', $imageData);
 						}
 
-						$result = Remote::request(
-							option('visionbites.kirby-atai.api_url'),
-							[
-								'headers' => [
-									'Content-Type' => 'application/json',
-									'X-API-Key' => option('visionbites.kirby-atai.api_key'),
-								],
-								'method' => 'POST',
-								'data' => json_encode($postData),
-							]
-						);
+						try {
+							$result = Remote::request(
+								option('visionbites.kirby-atai.api_url'),
+								[
+									'headers' => [
+										'Content-Type' => 'application/json',
+										'X-API-Key' => option('visionbites.kirby-atai.api_key'),
+									],
+									'method' => 'POST',
+									'data' => json_encode($postData),
+								]
+							);
 
-						return Response::json($result->content(), $result->code());
+							return Response::json($result->content(), $result->code());
+						} catch (\Exception $e) {
+							return Response::json(['error' => 'API request failed: ' . $e->getMessage(), 'error_code' => 500], 500);
+						}
 					}
 				]
 			];

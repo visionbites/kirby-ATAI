@@ -2,7 +2,7 @@
 	"name": "visionbites/kirby-atai",
 	"description": "A Kirby field plugin to generate alternative text for images using alttext.ai",
 	"license": "MIT",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"type": "kirby-plugin",
 	"authors": [
 		{
@@ -19,7 +19,8 @@
 		"installer-name": "kirby-atai"
 	},
 	"require": {
-		"getkirby/composer-installer": "^1.1"
+		"getkirby/composer-installer": "^1.1",
+		"getkirby/kirby": "^5.0"
 	},
 	"autoload": {
 		"files": ["index.php"]
